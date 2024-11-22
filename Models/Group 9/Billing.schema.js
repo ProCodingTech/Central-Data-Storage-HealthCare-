@@ -25,25 +25,38 @@ const lineItemSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
-}, { _id: false });
+});
 
 // Bill Schema
 const billSchema = new mongoose.Schema({
-  billId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
   patientId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Patient",
+    required: true,
+  },
+  doctorId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Doctor",
+    required: true,
+  },
+  serviceDate: {
+    type: Date,
+    required: true,
+  },
+  serviceCode: {
     type: String,
     required: true,
   },
-  dateIssued: {
-    type: Date,
+  serviceDescription: {
+    type: String,
     required: true,
   },
   dueDate: {
     type: Date,
+    required: true,
+  },
+  discountPercentage: {
+    type: Number,
     required: true,
   },
   totalAmount: {
@@ -51,34 +64,47 @@ const billSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
-  status: {
+  paymentStatus: {
     type: String,
     enum: ["Pending", "Paid", "Partially Paid", "Overdue"],
     required: true,
   },
-  lineItems: {
-    type: [lineItemSchema],
+  paymentMethod: {
+    type: String,
+    enum: ["Cash", "Credit Card", "Insurance"],
     required: true,
   },
-}, { _id: false });
+  dateIssued: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  lineItems: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "LineItem",
+    },
+  ],
+});
 
 // Insurance Claim Schema
 const insuranceClaimSchema = new mongoose.Schema({
-  claimId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
   billId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Bill',
     required: true,
   },
   patientId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Patient',
     required: true,
   },
-  insuranceProvider: {
-    type: String,
+  insuranceId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Insurance',
     required: true,
   },
   policyNumber: {
@@ -97,6 +123,7 @@ const insuranceClaimSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ["Submitted", "In Review", "Approved", "Partially Approved", "Denied"],
+    default: "Submitted",
     required: true,
   },
   approvedAmount: {
@@ -106,7 +133,15 @@ const insuranceClaimSchema = new mongoose.Schema({
   denialReason: {
     type: String,
   },
-}, { _id: false });
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
 // Insurance Eligibility Schema
 const insuranceEligibilitySchema = new mongoose.Schema({
@@ -155,7 +190,7 @@ const insuranceEligibilitySchema = new mongoose.Schema({
       required: true,
     },
   },
-}, { _id: false });
+});
 
 // Payment Schema
 const paymentSchema = new mongoose.Schema({
@@ -189,7 +224,7 @@ const paymentSchema = new mongoose.Schema({
   transactionId: {
     type: String,
   },
-}, { _id: false });
+});
 
 // Insurance Claims Summary Schema
 const insuranceClaimsSummarySchema = new mongoose.Schema({
@@ -213,7 +248,7 @@ const insuranceClaimsSummarySchema = new mongoose.Schema({
     min: 0,
     required: true,
   },
-}, { _id: false });
+});
 
 // Financial Report Schema
 const financialReportSchema = new mongoose.Schema({
@@ -254,7 +289,7 @@ const financialReportSchema = new mongoose.Schema({
     type: insuranceClaimsSummarySchema,
     required: true,
   },
-}, { _id: false });
+});
 
 // Main MedicalBillingAndInsurance Schema
 const medicalBillingAndInsuranceSchema = new mongoose.Schema({
