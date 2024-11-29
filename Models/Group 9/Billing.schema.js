@@ -194,18 +194,20 @@ const insuranceEligibilitySchema = new mongoose.Schema({
 
 // Payment Schema
 const paymentSchema = new mongoose.Schema({
-  paymentId: {
-    type: String,
-    required: true,
-    unique: true,
-  },
   billId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Bill",
     required: true,
   },
   patientId: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Patient",
     required: true,
+  },
+  prescriptionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Prescription",
+    required: true
   },
   amount: {
     type: Number,
