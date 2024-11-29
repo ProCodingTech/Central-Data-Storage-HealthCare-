@@ -218,11 +218,58 @@ const paymentSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    enum: ["Credit Card", "Debit Card", "Bank Transfer", "Cash", "Check"],
+    enum: ["Card", "Bank Transfer", "Cash", "Check"],
     required: true,
   },
   transactionId: {
     type: String,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  status: {
+    type: String,
+    enum: ["Pending", "Completed", "Failed", "Refunded"],
+    default: "Pending",
+    required: true,
+  },
+  cardDetails: {
+    cardNumber: {
+      type: String,
+    },
+    cardHolderName: {
+      type: String,
+    },
+    cardExpiry: {
+      type: String,
+    },
+    cardType: {
+      type: String,
+    },
+  },
+  checkDetails: {
+    checkNumber: {
+      type: String,
+    },
+    checkDate: {
+      type: Date,
+    },
+    bankName: {
+      type: String,
+    },
+  },
+  refundDetails: {
+    refundDate: {
+      type: Date,
+    },
+    refundReason: {
+      type: String,
+    },
   },
 });
 
