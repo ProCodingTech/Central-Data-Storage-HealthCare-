@@ -5,6 +5,7 @@ const getAllNurses = async (req, res) => {
   try {
     const nurses = await Nurse.find();
     res.status(200).json(nurses);
+    console.log(nurses);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching nurses', error });
   }
@@ -32,8 +33,12 @@ const createNurse = async (req, res) => {
   try {
     const savedNurse = await newNurse.save();
     res.status(201).json(savedNurse);
+    console.log('Nurse Created');
+    
   } catch (error) {
     res.status(400).json({ message: 'Error creating nurse entry', error });
+    console.log('error:',error);
+    
   }
 };
 
