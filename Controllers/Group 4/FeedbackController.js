@@ -1,53 +1,72 @@
-const Feedback = require('../../Models/Group 4/Feedback.schema');
+const Feedback = require('../Models/Feedback.Schema');
+const User = require('../Models/User');
 
-// Get all feedback records
-const getAllFeedback = async (req, res) => {
-  try {
-    const feedback = await Feedback.find();
-    res.status(200).json(feedback);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching feedback records', error });
-  }
-};
+// Controller to give feedback
+const giveFeedback = async (req, res) => {
+    try {
+        const { feedback } = req.body;
+        const doctorId = req.params.id; // Doctor ID from params
+        const patientId = res.locals.userId; // Patient ID from middleware
+        const userRole = res.locals.userrole; // Role from middleware
+        console.log(userRole);
 
-// Create a new feedback entry
-const createFeedback = async (req, res) => {
-  const { feedback_id, user_id, provider_id, feedback_text, rating, submitted_at } = req.body;
+        if (!doctorId || !feedback) {
+            return res.status(400).json({ message: 'Doctor ID and feedback are required.' });
+        }
 
-  const newFeedback = new Feedback({
-    feedback_id,
-    user_id,
-    provider_id,
-    feedback_text,
-    rating,
-    submitted_at,
-  });
+        // Check if the user exists and is a patient
+        const user = await User.findById(patientId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
 
-  try {
-    const savedFeedback = await newFeedback.save();
-    res.status(201).json(savedFeedback);
-  } catch (error) {
-    res.status(400).json({ message: 'Error creating feedback entry', error });
-  }
-};
+        if (userRole != 'Patient') {
+            return res.status(403).json({ message: 'Only patients can provide feedback.' });
+        }
 
-// Delete feedback by ID
-const deleteFeedbackById = async (req, res) => {
-  const { id } = req.params;
+        // Check if doctor exists in the User collection
+        const doctor = await User.findById(doctorId);
+        if (!doctor) {
+            return res.status(404).json({ message: 'Doctor not found.' });
+        }
 
-  try {
-    const deletedFeedback = await Feedback.findByIdAndDelete(id);
-    if (!deletedFeedback) {
-      return res.status(404).json({ message: 'Feedback not found' });
+        // Save feedback
+        const newFeedback = new Feedback({
+            patientId,
+            doctorId,
+            feedback,
+            patientName: user.name, // Patient name from the user document
+        });
+
+        await newFeedback.save();
+        res.status(201).json({ message: 'Feedback submitted successfully!', data: newFeedback });
+    } catch (error) {
+        res.status(500).json({ message: 'Error submitting feedback.', error: error.message });
     }
-    res.status(200).json({ message: 'Feedback deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting feedback', error });
-  }
 };
 
-module.exports = {
-  getAllFeedback,
-  createFeedback,
-  deleteFeedbackById,
+// Controller to get feedbacks
+const getFeedback = async (req, res) => {
+    try {
+        const doctorId = res.locals.userId; // Doctor ID from middleware
+        const userRole = res.locals.userrole; // Role from middleware
+        console.log(userRole);
+
+        if (userRole != 'Doctor') {
+            return res.status(403).json({ message: 'Only doctors can view feedback.' });
+        }
+
+        // Fetch feedback for the logged-in doctor
+        const feedbacks = await Feedback.find({ doctorId }).populate('patientId', 'name');
+
+        if (feedbacks.length === 0) {
+            return res.status(404).json({ message: 'No feedback found for this doctor.' });
+        }
+
+        res.status(200).json({ message: 'Feedback retrieved successfully!', data: feedbacks });
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving feedback.', error: error.message });
+    }
 };
+
+module.exports = { giveFeedback, getFeedback };

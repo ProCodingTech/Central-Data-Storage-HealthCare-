@@ -1,39 +1,28 @@
 const mongoose = require('mongoose');
 
-const feedbackSchema = new mongoose.Schema({
-    feedback_id: { 
-      type: String, 
-      required: true, 
-      unique: true, 
-      match: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/ // UUID format
+const FeedbackSchema = new mongoose.Schema({
+    patientId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
     },
-    user_id: { 
-      type: String, 
-      required: true, 
-      match: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/ // UUID format
+    doctorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
     },
-    provider_id: { 
-      type: String, 
-      required: true, 
-      match: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/ // UUID format
+    feedback: {
+        type: String,
+        required: true,
     },
-    feedback_text: { 
-      type: String, 
-      required: true 
+    patientName: {
+        type: String,
+        required: true,
     },
-    rating: { 
-      type: Number, 
-      min: 1, 
-      max: 5 // Assuming a rating scale of 1 to 5
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
-    submitted_at: { 
-      type: Date, 
-      required: true 
-    }
-  }, {
-    timestamps: true,
-    versionKey: false
 });
 
-const Feedback = mongoose.model('Feedback', feedbackSchema);
-module.exports = Feedback;
+module.exports = mongoose.model('Feedback', FeedbackSchema);
